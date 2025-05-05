@@ -1,6 +1,7 @@
 import 'package:chat_app/Model/ChatRoom.dart';
 import 'package:chat_app/Model/Message.dart';
 import 'package:chat_app/Model/User.dart';
+import 'package:chat_app/constants.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
@@ -114,7 +115,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Container(
             alignment: Alignment.center,
             padding: const EdgeInsets.all(10),
-            child:  Text('${currentTime.day.toString()}/${currentTime.month.toString()}/${currentTime.year.toString()}')),
+            child:  Text('${currentTime.day.toString()} ${Constants.getMonth(currentTime.month)} ${currentTime.year.toString()}')),
           messageBubble(true),
           messageBubble(false),
         ],
@@ -126,4 +127,6 @@ class _ChatScreenState extends State<ChatScreen> {
   void sendMsg() {
     _msgController.clear();
   }
+
+  
 }
