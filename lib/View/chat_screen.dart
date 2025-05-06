@@ -5,6 +5,7 @@ import 'package:chat_app/Model/Message.dart';
 import 'package:chat_app/Model/User.dart';
 import 'package:chat_app/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatScreen extends StatefulWidget {
 
@@ -34,6 +35,8 @@ class _ChatScreenState extends State<ChatScreen> {
   ScrollController _scrollController = ScrollController();
 
   StreamController _streamController = StreamController<List<Message>>();
+   late IO.Socket socket;
+  
   
 
   Widget messageBubble(Message message) {
@@ -107,9 +110,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     color: Colors.white,
                   ),
                   child: TextField(
-                    onTap: () => _scrollController.jumpTo(
+                    onTap: ()async {
+                      await Future.delayed(const Duration(milliseconds: 500));
+                      _scrollController.jumpTo(
     _scrollController.position.maxScrollExtent,
-  ),
+  );},
                     maxLines: null,
                     keyboardType: TextInputType.multiline,
                     decoration: const InputDecoration(
@@ -132,6 +137,29 @@ class _ChatScreenState extends State<ChatScreen> {
                 ))
           ],
         ));
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+     socket = IO.io(Constants.SERVER_URL, <String, dynamic>{
+      'transports': ['websocket'],
+    });
+
+    // Event listener for 'connect' event
+    socket.on('connect', (_) {
+      print('Connected to server');
+      
+    });
+
+    // Listen for messages from the server
+    socket.on('message', (data) {
+      print('msg is $data');
+    });
+
+    socket.connect();
   }
 
   @override
@@ -192,7 +220,12 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void sendMsg() {
+    if(socket.connected){
+      var msg = {'id': 'abc', 'content': _msgController.text, 'time': DateTime.now().toString(),'sender': 'sabc','receiver': 'rabc'};
+      socket.emit('message', msg);
     _msgController.clear();
+    
+    }
   }
   
   Widget dateRow(DateTime currentTime) 

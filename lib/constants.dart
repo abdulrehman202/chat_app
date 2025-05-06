@@ -6,6 +6,7 @@ class Constants {
   static String BASE_IMAGE_PATH  = 'assets/images/';
   static String SPLASH_ICON_PATH  = '${BASE_IMAGE_PATH}splash_icon.png';
   static String FONT_NAME  = 'Jost';
+  static String SERVER_URL = 'http://10.0.2.2:3000';
 
   static  getMonth(int num)
   {
