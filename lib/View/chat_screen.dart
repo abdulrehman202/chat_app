@@ -40,13 +40,10 @@ class _ChatScreenState extends State<ChatScreen> {
     return Align(
       alignment: message.sender == widget.chatRoom.sender.id ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        alignment: Alignment.centerLeft,
         padding: const EdgeInsets.all(10),
         margin: const EdgeInsets.only(bottom: 10,left: 10,right: 10),
         decoration: message.sender == widget.chatRoom.sender.id  ? senderDec : receiverDec,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          
           children: [
             Padding(
               padding: const EdgeInsets.all(10),
@@ -57,8 +54,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             Container(
                 margin: const EdgeInsets.symmetric(vertical: 5),
-                alignment: Alignment.bottomRight,
-                child: Text( get12hrsTime(msgTime) //'${msgTime.hour.toString().padLeft(2,'0')}:${msgTime.minute.toString().padLeft(2,'0')}'
+                child: Text( Constants.get12hrsTime(msgTime),
                 ))
           ],
         ),
@@ -66,20 +62,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  String get12hrsTime(DateTime dtime)
-  {
-    String time = '';
-    String unit = dtime.hour>12 ?'pm':'am';
-    String min = dtime.minute.toString(), hour = dtime.hour.toString();
-    
-    if(dtime.hour>12)
-    {
-      hour = (dtime.hour-12).toString();
-    }
-
-    time = '$hour:$min $unit';
-    return time;
-  }
+  
 
   Widget messageWriter() {
     return Container(
@@ -135,6 +118,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
       appBar: AppBar(
+        
         title: Text(
           widget.chatRoom.receiver.name,
           style: const TextStyle(color: Colors.white),
@@ -144,14 +128,18 @@ class _ChatScreenState extends State<ChatScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            Container(
-                alignment: Alignment.center,
-                padding: const EdgeInsets.all(10),
-                child: Text(
-                    '${currentTime.day.toString()} ${Constants.getMonth(currentTime.month)} ${currentTime.year.toString()}')),
+            dateRow(currentTime),
+
             messageBubble(Message('abc', 'Hello!', DateTime.now(), 'sabc', 'rabc')),
             messageBubble(Message('abc', 'Hi!', DateTime.now(), 'rabc', 'sabc')),
-            messageBubble(Message('abc', 'How you doing?', DateTime.now(), 'sabc', 'rabc')),
+            messageBubble(Message('abc', 'How are you doing?', DateTime.now(), 'sabc', 'rabc')),
+            messageBubble(Message('abc', 'I am good', DateTime.now(), 'rabc', 'sabc')),
+            messageBubble(Message('abc', 'What are you up to these days?', DateTime.now(), 'sabc', 'rabc')),
+            messageBubble(Message('abc', 'Nothing just waiting for some kind of offer letter', DateTime.now(), 'rabc', 'sabc')),
+            messageBubble(Message('abc', 'Have you applied somewhere?', DateTime.now(), 'sabc', 'rabc')),
+            messageBubble(Message('abc', 'Yes at several organizations', DateTime.now(), 'rabc', 'sabc')),
+            messageBubble(Message('abc', 'Best of luck!', DateTime.now(), 'sabc', 'rabc')),
+            messageBubble(Message('abc', 'Thanks!', DateTime.now(), 'rabc', 'sabc')),
             
           ],
         ),
@@ -161,5 +149,27 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void sendMsg() {
     _msgController.clear();
+  }
+  
+  Widget dateRow(DateTime currentTime) 
+  {
+    return Row(
+              children: [
+                Expanded(child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  child: const Divider(
+                    color: Colors.black,
+                  ))),
+                Container(
+                    alignment: Alignment.center,
+                    padding: const EdgeInsets.all(10),
+                    child: Text(
+                        '${currentTime.day.toString()} ${Constants.getMonth(currentTime.month)} ${currentTime.year.toString()}')),
+              Expanded(child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  child: const Divider(
+                    color: Colors.black,))),
+              ],
+            );
   }
 }

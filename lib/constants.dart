@@ -63,6 +63,26 @@ class Constants {
   {
     return MediaQuery.of(context).size.height;
   }
+  
+  static String get12hrsTime(DateTime dtime)
+  {
+    String time = '';
+    String unit = 'am';
+    String min = dtime.minute.toString(), hour = dtime.hour.toString();
+    
+    if(dtime.hour>12)
+    {
+      hour = (dtime.hour-12).toString();
+      unit = 'pm';
+    }
 
+    time = '$hour:${min.padLeft(2,'0')} $unit';
+    return time;
+  }
+
+  static String get24hrsTime(DateTime dtime)
+  {
+    return '${dtime.hour.toString().padLeft(2,'0')}:${dtime.minute.toString().padLeft(2,'0')}';
+  }
 
 }
