@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_app/Model/ChatRoom.dart';
 import 'package:chat_app/Model/Message.dart';
 import 'package:chat_app/Model/User.dart';
@@ -5,6 +7,8 @@ import 'package:chat_app/constants.dart';
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
+
+  
   ChatRoom chatRoom =
       ChatRoom('abc', User('sabc', 'Sender'), User('rabc', 'Receiver'), []);
 
@@ -16,10 +20,19 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   TextEditingController _msgController = TextEditingController();
+  ScrollController _scrollController = ScrollController();
+
+  StreamController _streamController = StreamController<List<Message>>();
+  
 
   Widget messageBubble(Message message) {
     DateTime msgTime = message.time;
     double radius = 30.0;
+
+    String timeContent = Constants.get12hrsTime(msgTime);
+    
+    CrossAxisAlignment cAlignment = timeContent.length < message.content.length? CrossAxisAlignment.end:CrossAxisAlignment.start;
+
     BoxDecoration senderDec = BoxDecoration(
       color: Colors.orangeAccent,
       borderRadius: BorderRadius.only(
@@ -37,16 +50,20 @@ class _ChatScreenState extends State<ChatScreen> {
         bottomRight: Radius.circular(radius),
       ),
     );
+
+
     return Align(
       alignment: message.sender == widget.chatRoom.sender.id ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
+        
         padding: const EdgeInsets.all(10),
         margin: const EdgeInsets.only(bottom: 10,left: 10,right: 10),
         decoration: message.sender == widget.chatRoom.sender.id  ? senderDec : receiverDec,
         child: Column(
+          crossAxisAlignment: cAlignment,
           children: [
             Padding(
-              padding: const EdgeInsets.all(10),
+              padding: const EdgeInsets.only(top: 10,right: 10,bottom: 10),
               child: Text(
                 message.content,
                 overflow: TextOverflow.clip,
@@ -54,7 +71,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             Container(
                 margin: const EdgeInsets.symmetric(vertical: 5),
-                child: Text( Constants.get12hrsTime(msgTime),
+                child: Text( timeContent,
                 ))
           ],
         ),
@@ -79,6 +96,9 @@ class _ChatScreenState extends State<ChatScreen> {
                     color: Colors.white,
                   ),
                   child: TextField(
+                    onTap: () => _scrollController.jumpTo(
+    _scrollController.position.maxScrollExtent,
+  ),
                     maxLines: null,
                     keyboardType: TextInputType.multiline,
                     decoration: const InputDecoration(
@@ -106,6 +126,8 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     DateTime currentTime = DateTime.now();
+    _streamController.sink.add(widget.chatRoom.messages);
+
     return Scaffold(
       resizeToAvoidBottomInset: false,
       bottomNavigationBar: Column(
@@ -126,10 +148,27 @@ class _ChatScreenState extends State<ChatScreen> {
         backgroundColor: const Color.fromARGB(255, 158, 46, 46),
       ),
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Column(
           children: [
-            dateRow(currentTime),
-
+            dateRow(currentTime.add(Duration(days: 1))),
+            // Expanded(
+            //   child: StreamBuilder(
+            //     stream: _streamController.stream , 
+            //     builder: (context, snapshot)
+            //   {
+            //     List<Message> msgs = snapshot.data??[];
+            //     return ListView.builder(
+            //       scrollDirection: Axis.vertical,
+            //       shrinkWrap: true,
+            //       itemCount: msgs.length,itemBuilder: (context, index)
+            //     {
+            //       return messageBubble(msgs[index]);
+            //     }
+            //     );
+                
+            //   }),
+            // ),
             messageBubble(Message('abc', 'Hello!', DateTime.now(), 'sabc', 'rabc')),
             messageBubble(Message('abc', 'Hi!', DateTime.now(), 'rabc', 'sabc')),
             messageBubble(Message('abc', 'How are you doing?', DateTime.now(), 'sabc', 'rabc')),
