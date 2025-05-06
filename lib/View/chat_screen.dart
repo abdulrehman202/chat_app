@@ -10,7 +10,18 @@ class ChatScreen extends StatefulWidget {
 
   
   ChatRoom chatRoom =
-      ChatRoom('abc', User('sabc', 'Sender'), User('rabc', 'Receiver'), []);
+      ChatRoom('abc', User('sabc', 'Sender'), User('rabc', 'Receiver'), [
+        Message('abc', 'Hello!', DateTime.now(), 'sabc', 'rabc'),
+            Message('abc', 'Hi!', DateTime.now(), 'rabc', 'sabc'),
+            Message('abc', 'How are you doing?', DateTime.now(), 'sabc', 'rabc'),
+            Message('abc', 'I am good', DateTime.now(), 'rabc', 'sabc'),
+            Message('abc', 'What are you up to these days?', DateTime.now(), 'sabc', 'rabc'),
+            Message('abc', 'Nothing just waiting for some kind of offer letter', DateTime.now(), 'rabc', 'sabc'),
+            Message('abc', 'Have you applied somewhere?', DateTime.now(), 'sabc', 'rabc'),
+            Message('abc', 'Yes at several organizations', DateTime.now(), 'rabc', 'sabc'),
+            Message('abc', 'Best of luck!', DateTime.now(), 'sabc', 'rabc'),
+            Message('abc', 'Thanks!', DateTime.now(), 'rabc', 'sabc'),
+      ]);
 
   ChatScreen({super.key});
 
@@ -151,34 +162,28 @@ class _ChatScreenState extends State<ChatScreen> {
         controller: _scrollController,
         child: Column(
           children: [
-            dateRow(currentTime.add(Duration(days: 1))),
-            // Expanded(
-            //   child: StreamBuilder(
-            //     stream: _streamController.stream , 
-            //     builder: (context, snapshot)
-            //   {
-            //     List<Message> msgs = snapshot.data??[];
-            //     return ListView.builder(
-            //       scrollDirection: Axis.vertical,
-            //       shrinkWrap: true,
-            //       itemCount: msgs.length,itemBuilder: (context, index)
-            //     {
-            //       return messageBubble(msgs[index]);
-            //     }
-            //     );
+            dateRow(currentTime),
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                minHeight: 20
+              ),
+              child: StreamBuilder(
+                stream: _streamController.stream , 
+                builder: (context, snapshot)
+              {
+                List<Message> msgs = snapshot.data??[];
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const ScrollPhysics(),
+                  itemCount: msgs.length,itemBuilder: (context, index)
+                {
+                  return messageBubble(msgs[index]);
+                }
+                );
                 
-            //   }),
-            // ),
-            messageBubble(Message('abc', 'Hello!', DateTime.now(), 'sabc', 'rabc')),
-            messageBubble(Message('abc', 'Hi!', DateTime.now(), 'rabc', 'sabc')),
-            messageBubble(Message('abc', 'How are you doing?', DateTime.now(), 'sabc', 'rabc')),
-            messageBubble(Message('abc', 'I am good', DateTime.now(), 'rabc', 'sabc')),
-            messageBubble(Message('abc', 'What are you up to these days?', DateTime.now(), 'sabc', 'rabc')),
-            messageBubble(Message('abc', 'Nothing just waiting for some kind of offer letter', DateTime.now(), 'rabc', 'sabc')),
-            messageBubble(Message('abc', 'Have you applied somewhere?', DateTime.now(), 'sabc', 'rabc')),
-            messageBubble(Message('abc', 'Yes at several organizations', DateTime.now(), 'rabc', 'sabc')),
-            messageBubble(Message('abc', 'Best of luck!', DateTime.now(), 'sabc', 'rabc')),
-            messageBubble(Message('abc', 'Thanks!', DateTime.now(), 'rabc', 'sabc')),
+              }),
+            ),
+            
             
           ],
         ),
