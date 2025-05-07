@@ -1,8 +1,8 @@
 class Message{
-  String _id, _content,  _sender, _receiver;
+  String _id, _content,  _sender, _receiver,_chatId;
   DateTime _time;
   
-  Message(this._id, this._content, this._time, this._sender, this._receiver);
+  Message(this._id, this._content, this._time, this._sender, this._receiver,this._chatId);
 
   String get id
   {
@@ -54,5 +54,14 @@ class Message{
     _receiver = receiver;
   }
   
+  String get chatId
+  {
+    return _chatId;
+  }
+
+  set chatId(String id)
+  {
+    _chatId = id;
+  }
 
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_app/View/channel_screen.dart';
 import 'package:chat_app/View/chat_screen.dart';
 import 'package:chat_app/constants.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   _moveToFirstScreen(BuildContext context) {
     Navigator.pushReplacement(
-        context, MaterialPageRoute(builder: (builder) => ChatScreen()));
+        context, MaterialPageRoute(builder: (builder) => ChannelScreen()));
   }
 
   Widget _body(BuildContext context) {

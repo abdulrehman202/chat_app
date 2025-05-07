@@ -8,23 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class ChatScreen extends StatefulWidget {
+  User user, receiver;
 
-  
-  ChatRoom chatRoom =
-      ChatRoom('abc', User('sabc', 'Sender'), User('rabc', 'Receiver'), [
-        Message('abc', 'Hello!', DateTime.now(), 'sabc', 'rabc'),
-            Message('abc', 'Hi!', DateTime.now(), 'rabc', 'sabc'),
-            Message('abc', 'How are you doing?', DateTime.now(), 'sabc', 'rabc'),
-            Message('abc', 'I am good', DateTime.now(), 'rabc', 'sabc'),
-            Message('abc', 'What are you up to these days?', DateTime.now(), 'sabc', 'rabc'),
-            Message('abc', 'Nothing just waiting for some kind of offer letter', DateTime.now(), 'rabc', 'sabc'),
-            Message('abc', 'Have you applied somewhere?', DateTime.now(), 'sabc', 'rabc'),
-            Message('abc', 'Yes at several organizations', DateTime.now(), 'rabc', 'sabc'),
-            Message('abc', 'Best of luck!', DateTime.now(), 'sabc', 'rabc'),
-            Message('abc', 'Thanks!', DateTime.now(), 'rabc', 'sabc'),
-      ]);
-
-  ChatScreen({super.key});
+  ChatScreen({super.key, required this.user, required User this.receiver});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -33,19 +19,20 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   TextEditingController _msgController = TextEditingController();
   ScrollController _scrollController = ScrollController();
+  late ChatRoom chatRoom;
 
   StreamController _streamController = StreamController<List<Message>>();
-   late IO.Socket socket;
-  
-  
+  late IO.Socket socket;
 
   Widget messageBubble(Message message) {
     DateTime msgTime = message.time;
     double radius = 30.0;
 
     String timeContent = Constants.get12hrsTime(msgTime);
-    
-    CrossAxisAlignment cAlignment = timeContent.length < message.content.length? CrossAxisAlignment.end:CrossAxisAlignment.start;
+
+    CrossAxisAlignment cAlignment = timeContent.length < message.content.length
+        ? CrossAxisAlignment.end
+        : CrossAxisAlignment.start;
 
     BoxDecoration senderDec = BoxDecoration(
       color: Colors.orangeAccent,
@@ -65,19 +52,20 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
 
-
     return Align(
-      alignment: message.sender == widget.chatRoom.sender.id ? Alignment.centerRight : Alignment.centerLeft,
+      alignment: message.sender == chatRoom.sender.id
+          ? Alignment.centerRight
+          : Alignment.centerLeft,
       child: Container(
-        
         padding: const EdgeInsets.all(10),
-        margin: const EdgeInsets.only(bottom: 10,left: 10,right: 10),
-        decoration: message.sender == widget.chatRoom.sender.id  ? senderDec : receiverDec,
+        margin: const EdgeInsets.only(bottom: 10, left: 10, right: 10),
+        decoration:
+            message.sender == chatRoom.sender.id ? senderDec : receiverDec,
         child: Column(
           crossAxisAlignment: cAlignment,
           children: [
             Padding(
-              padding: const EdgeInsets.only(top: 10,right: 10,bottom: 10),
+              padding: const EdgeInsets.only(top: 10, right: 10, bottom: 10),
               child: Text(
                 message.content,
                 overflow: TextOverflow.clip,
@@ -85,15 +73,14 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
             Container(
                 margin: const EdgeInsets.symmetric(vertical: 5),
-                child: Text( timeContent,
+                child: Text(
+                  timeContent,
                 ))
           ],
         ),
       ),
     );
   }
-
-  
 
   Widget messageWriter() {
     return Container(
@@ -110,11 +97,12 @@ class _ChatScreenState extends State<ChatScreen> {
                     color: Colors.white,
                   ),
                   child: TextField(
-                    onTap: ()async {
+                    onTap: () async {
                       await Future.delayed(const Duration(milliseconds: 500));
                       _scrollController.jumpTo(
-    _scrollController.position.maxScrollExtent,
-  );},
+                        _scrollController.position.maxScrollExtent,
+                      );
+                    },
                     maxLines: null,
                     keyboardType: TextInputType.multiline,
                     decoration: const InputDecoration(
@@ -144,19 +132,27 @@ class _ChatScreenState extends State<ChatScreen> {
     // TODO: implement initState
     super.initState();
 
-     socket = IO.io(Constants.SERVER_URL, <String, dynamic>{
+    chatRoom = ChatRoom('abc', widget.user, widget.receiver, []);
+
+    socket = IO.io(Constants.SERVER_URL, <String, dynamic>{
       'transports': ['websocket'],
     });
 
     // Event listener for 'connect' event
     socket.on('connect', (_) {
       print('Connected to server');
-      
     });
 
     // Listen for messages from the server
     socket.on('message', (data) {
-      print('msg is $data');
+      try {
+          if(data['chatId'] == chatRoom.id){
+          chatRoom.messages.add(Message(data['id'], data['content'],
+              DateTime.now(), data['sender'], data['receiver'],data['chatId']));
+          _streamController.sink.add(chatRoom.messages);}
+      } catch (e) {
+        print('');
+      }
     });
 
     socket.connect();
@@ -165,7 +161,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     DateTime currentTime = DateTime.now();
-    _streamController.sink.add(widget.chatRoom.messages);
+    _streamController.sink.add(chatRoom.messages);
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -179,9 +175,8 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
       appBar: AppBar(
-        
         title: Text(
-          widget.chatRoom.receiver.name,
+          chatRoom.receiver.name,
           style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color.fromARGB(255, 158, 46, 46),
@@ -192,27 +187,20 @@ class _ChatScreenState extends State<ChatScreen> {
           children: [
             dateRow(currentTime),
             ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: 20
-              ),
+              constraints: const BoxConstraints(minHeight: 20),
               child: StreamBuilder(
-                stream: _streamController.stream , 
-                builder: (context, snapshot)
-              {
-                List<Message> msgs = snapshot.data??[];
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics: const ScrollPhysics(),
-                  itemCount: msgs.length,itemBuilder: (context, index)
-                {
-                  return messageBubble(msgs[index]);
-                }
-                );
-                
-              }),
+                  stream: _streamController.stream,
+                  builder: (context, snapshot) {
+                    List<Message> msgs = snapshot.data ?? [];
+                    return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const ScrollPhysics(),
+                        itemCount: msgs.length,
+                        itemBuilder: (context, index) {
+                          return messageBubble(msgs[index]);
+                        });
+                  }),
             ),
-            
-            
           ],
         ),
       ),
@@ -220,33 +208,41 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void sendMsg() {
-    if(socket.connected){
-      var msg = {'id': 'abc', 'content': _msgController.text, 'time': DateTime.now().toString(),'sender': 'sabc','receiver': 'rabc'};
+    if (socket.connected) {
+      var msg = {
+        'id': 'abc',
+        'content': _msgController.text,
+        'time': DateTime.now().toString(),
+        'sender': chatRoom.sender.id,
+        'receiver': chatRoom.receiver.id,
+        'chatId':chatRoom.id,
+      };
       socket.emit('message', msg);
-    _msgController.clear();
-    
+      _msgController.clear();
     }
   }
-  
-  Widget dateRow(DateTime currentTime) 
-  {
+
+  Widget dateRow(DateTime currentTime) {
     return Row(
-              children: [
-                Expanded(child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  child: const Divider(
-                    color: Colors.black,
-                  ))),
-                Container(
-                    alignment: Alignment.center,
-                    padding: const EdgeInsets.all(10),
-                    child: Text(
-                        '${currentTime.day.toString()} ${Constants.getMonth(currentTime.month)} ${currentTime.year.toString()}')),
-              Expanded(child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  child: const Divider(
-                    color: Colors.black,))),
-              ],
-            );
+      children: [
+        Expanded(
+            child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                child: const Divider(
+                  color: Colors.black,
+                ))),
+        Container(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.all(10),
+            child: Text(
+                '${currentTime.day.toString()} ${Constants.getMonth(currentTime.month)} ${currentTime.year.toString()}')),
+        Expanded(
+            child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 10),
+                child: const Divider(
+                  color: Colors.black,
+                ))),
+      ],
+    );
   }
 }
