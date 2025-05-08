@@ -24,8 +24,8 @@ class _SplashScreenState extends State<SplashScreen> {
     _moveToFirstScreen(context);}
     catch(e){
       Constants.IP_ADD = '192.168.90.157';
-    }
     _moveToFirstScreen(context);
+    }
   }
 
   @override

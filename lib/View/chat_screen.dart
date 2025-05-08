@@ -132,7 +132,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // TODO: implement initState
     super.initState();
 
-    chatRoom = ChatRoom('abc', widget.user, widget.receiver, []);
+    chatRoom = ChatRoom(widget.user.id+widget.receiver.id, widget.user, widget.receiver, []);
 
     socket = IO.io(Constants.SERVER_URL, <String, dynamic>{
       'transports': ['websocket'],
@@ -146,7 +146,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // Listen for messages from the server
     socket.on('message', (data) {
       try {
-          if(data['chatId'] == chatRoom.id){
+          if(data['chatId'] == chatRoom.sender.id+chatRoom.receiver.id || data['chatId'] == chatRoom.receiver.id+chatRoom.sender.id){
           chatRoom.messages.add(Message(data['id'], data['content'],
               DateTime.now(), data['sender'], data['receiver'],data['chatId']));
           _streamController.sink.add(chatRoom.messages);}
