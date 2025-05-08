@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:chat_app/View/channel_screen.dart';
-import 'package:chat_app/View/chat_screen.dart';
 import 'package:chat_app/constants.dart';
 import 'package:flutter/material.dart';
-
+import 'package:network_info_plus/network_info_plus.dart';
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -16,7 +15,16 @@ class _SplashScreenState extends State<SplashScreen> {
   
 
   _initProcess() async {
+    try{
     await Future.delayed(const Duration(seconds: 5));
+    
+    var ip = await NetworkInfo().getWifiGatewayIP();
+
+    Constants.IP_ADD = ip.toString();
+    _moveToFirstScreen(context);}
+    catch(e){
+      Constants.IP_ADD = '192.168.90.157';
+    }
     _moveToFirstScreen(context);
   }
 
