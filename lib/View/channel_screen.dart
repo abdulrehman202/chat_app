@@ -1,4 +1,3 @@
-import 'package:chat_app/Model/ChatRoom.dart';
 import 'package:chat_app/Model/User.dart';
 import 'package:chat_app/View/chat_screen.dart';
 import 'package:flutter/material.dart';

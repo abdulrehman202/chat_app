@@ -23,12 +23,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   StreamController _streamController = StreamController<List<Message>>();
   late IO.Socket socket;
+    bool format12 = true;
 
   Widget messageBubble(Message message) {
     DateTime msgTime = message.time;
     double radius = 30.0;
 
-    String timeContent = Constants.get12hrsTime(msgTime);
+    String timeContent = format12? Constants.get12hrsTime(msgTime): Constants.get24hrsTime(msgTime);
 
     CrossAxisAlignment cAlignment = timeContent.length < message.content.length
         ? CrossAxisAlignment.end
@@ -175,6 +176,17 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
       appBar: AppBar(
+        actions: [
+          Text('Time Format',style: TextStyle(fontSize: 20, color: Colors.white),),
+          Switch(value: format12, onChanged: (onChanged)
+          {
+            setState(() {
+              format12 = !format12;
+            });
+          },
+          activeColor: Colors.yellowAccent,
+          )
+        ],
         title: Text(
           chatRoom.receiver.name,
           style: const TextStyle(color: Colors.white),
