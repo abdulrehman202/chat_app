@@ -146,7 +146,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // Listen for messages from the server
     socket.on('message', (data) {
       try {
-          if(data['chatId'] == chatRoom.sender.id+chatRoom.receiver.id || data['chatId'] == chatRoom.receiver.id+chatRoom.sender.id){
+          if(data['chatId'].toString().contains(chatRoom.sender.id) && data['chatId'].toString().contains(chatRoom.receiver.id)){
           chatRoom.messages.add(Message(data['id'], data['content'],
               DateTime.now(), data['sender'], data['receiver'],data['chatId']));
           _streamController.sink.add(chatRoom.messages);}
